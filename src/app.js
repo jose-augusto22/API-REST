@@ -1,8 +1,12 @@
-const express = require("express");
+import { openDb } from "./configDB.js";
+
+import express from "express";
 const app = express();
 app.use(express.json());
 
-app.get("/", function (req, res) {
+openDb();
+
+app.get("/", function (_req, res) {
   res.send("Olá Mundo");
 });
 
