@@ -1,17 +1,19 @@
-import { openDb } from "./configDB.js";
+//import { openDb } from "./configDB.js";
+import createTable from "./controler/Tarefas.js";
+import insertTarefas from "./controler/Tarefas.js";
 
 import express from "express";
 const app = express();
 app.use(express.json());
 
-openDb();
+createTable();
 
-app.get("/", function (_req, res) {
+app.get("/", (req, res) => {
   res.send("Olá Mundo");
 });
 
-app.post("/tasks", function (req, res) {
-  console.log(req.body);
+app.post("/tasks", (req, res) => {
+  insertTarefas(req.body);
   res.json({
     statusCode: 200,
   });
