@@ -1,5 +1,12 @@
 import express from "express";
-import { createTable, insertTarefas } from "./controler/Tarefas.js";
+import {
+  createTable,
+  insertTarefas,
+  updateTarefa,
+  selectTarefas,
+  selectTarefaById,
+  deleteTarefa,
+} from "./controler/Tarefas.js";
 
 const app = express();
 app.use(express.json());
@@ -9,7 +16,49 @@ createTable();
 
 // Rota de teste
 app.get("/", (req, res) => {
-  res.send("Olá Mundo");
+  res.send("API OK");
+});
+
+//Rota para selecionar
+app.get("/tasks", async (req, res) => {
+  try {
+    const tarefas = await selectTarefas();
+    res.json({
+      statusCode: 200,
+      tarefas: tarefas,
+    });
+  } catch (err) {
+    res.status(500).json({
+      statusCode: 500,
+      message: "Erro ao buscar tarefas.",
+      error: err.message,
+    });
+  }
+});
+
+// Rota para selecionar uma tarefa
+app.get("/tasks/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const tarefa = await selectTarefaById(id);
+    if (tarefa) {
+      res.json({
+        statusCode: 200,
+        tarefa: tarefa,
+      });
+    } else {
+      res.status(404).json({
+        statusCode: 404,
+        message: `Tarefa com ID ${id} não encontrada.`,
+      });
+    }
+  } catch (err) {
+    res.status(500).json({
+      statusCode: 500,
+      message: "Erro ao buscar tarefa por ID.",
+      error: err.message,
+    });
+  }
 });
 
 // Rota para inserir uma nova tarefa
@@ -24,6 +73,42 @@ app.post("/tasks", async (req, res) => {
     res.status(500).json({
       statusCode: 500,
       message: "Erro ao inserir tarefa.",
+      error: err.message,
+    });
+  }
+});
+
+// Rota para atualizar uma tarefa existente
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await updateTarefa(id, req.body);
+    res.json({
+      statusCode: 200,
+      message: `Tarefa com ID ${id} atualizada com sucesso.`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      statusCode: 500,
+      message: "Erro ao atualizar tarefa.",
+      error: err.message,
+    });
+  }
+});
+
+// Rota para excluir uma tarefa
+app.delete("/tasks/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    await deleteTarefa(id);
+    res.json({
+      statusCode: 200,
+      message: `Tarefa com ID ${id} excluída com sucesso.`,
+    });
+  } catch (err) {
+    res.status(500).json({
+      statusCode: 500,
+      message: "Erro ao excluir tarefa.",
       error: err.message,
     });
   }
