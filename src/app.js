@@ -64,6 +64,14 @@ app.get("/tasks/:id", async (req, res) => {
 // Rota para inserir uma nova tarefa
 app.post("/tasks", async (req, res) => {
   try {
+    // Validação básica
+    if (!req.body.titulo || !req.body.status) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: "Título e status são obrigatórios.",
+      });
+    }
+
     await insertTarefas(req.body);
     res.json({
       statusCode: 200,
@@ -88,11 +96,18 @@ app.put("/tasks/:id", async (req, res) => {
       message: `Tarefa com ID ${id} atualizada com sucesso.`,
     });
   } catch (err) {
-    res.status(500).json({
-      statusCode: 500,
-      message: "Erro ao atualizar tarefa.",
-      error: err.message,
-    });
+    if (err.message.includes("não encontrada")) {
+      res.status(404).json({
+        statusCode: 404,
+        message: err.message,
+      });
+    } else {
+      res.status(500).json({
+        statusCode: 500,
+        message: "Erro ao atualizar tarefa.",
+        error: err.message,
+      });
+    }
   }
 });
 

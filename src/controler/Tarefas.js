@@ -41,18 +41,15 @@ export async function selectTarefaById(id) {
 export async function insertTarefas(tarefas) {
   try {
     const db = await openDb();
+    const dataAtual = new Date().toISOString().split("T")[0];
     await db.run(
       "INSERT INTO Tarefas (titulo, descricao, status, data_de_criacao) VALUES (?, ?, ?, ?)",
-      [
-        tarefas.titulo,
-        tarefas.descricao,
-        tarefas.status,
-        tarefas.data_de_criacao,
-      ]
+      [tarefas.titulo, tarefas.descricao, tarefas.status, dataAtual] // Usa a data atual
     );
     console.log("Tarefa inserida com sucesso.");
   } catch (err) {
     console.error("Erro ao inserir tarefa:", err.message);
+    throw err;
   }
 }
 
@@ -60,19 +57,24 @@ export async function insertTarefas(tarefas) {
 export async function updateTarefa(id, tarefas) {
   try {
     const db = await openDb();
+
+    // Verifica se a tarefa existe
+    const tarefaExistente = await db.get(
+      "SELECT id FROM Tarefas WHERE id = ?",
+      [id]
+    );
+    if (!tarefaExistente) {
+      throw new Error(`Tarefa com ID ${id} não encontrada.`);
+    }
+
     await db.run(
-      "UPDATE Tarefas SET titulo = ?, descricao = ?, status = ?, data_de_criacao = ? WHERE id = ?",
-      [
-        tarefas.titulo,
-        tarefas.descricao,
-        tarefas.status,
-        tarefas.data_de_criacao,
-        id,
-      ]
+      "UPDATE Tarefas SET titulo = ?, descricao = ?, status = ? WHERE id = ?",
+      [tarefas.titulo, tarefas.descricao, tarefas.status, id]
     );
     console.log(`Tarefa com ID ${id} atualizada com sucesso.`);
   } catch (err) {
     console.error("Erro ao atualizar tarefa:", err.message);
+    throw err; // Lança o erro para ser tratado no chamador
   }
 }
 
