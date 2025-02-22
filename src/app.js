@@ -1,4 +1,7 @@
 import express from "express";
+import fs from "fs";
+import https from "https";
+import cors from "cors";
 import {
   createTable,
   insertTarefas,
@@ -10,6 +13,7 @@ import {
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Cria a tabela ao iniciar o servidor
 createTable();
@@ -131,3 +135,13 @@ app.delete("/tasks/:id", async (req, res) => {
 
 // Inicia o servidor
 app.listen(3000, () => console.log("API rodando na porta 3000."));
+
+https
+  .createServer(
+    {
+      cert: fs.readFileSync("./src/SSL/code.crt"),
+      key: fs.readFileSync("./src/SSL/code.key"),
+    },
+    app
+  )
+  .listen(3001, () => console.log("Rodando em HTTPs"));
